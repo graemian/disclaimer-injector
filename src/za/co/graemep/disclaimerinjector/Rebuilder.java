@@ -11,16 +11,28 @@ import javax.mail.Multipart;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 public class Rebuilder {
 	
+	private static Logger log = Logger.getLogger(DisclaimerInjectorMilter.class);
+	
+	
+	private String disclaimerTextFile;
+	private String disclaimerHtmlFile;
 	private static final String CONTENT_TYPE_TEXT = "text/plain";
 	private static final String CONTENT_TYPE_HTML = "text/html";
 	private boolean firstText=true;
 	private boolean firstHTML=true;
+	
+	public Rebuilder(String disclaimerHtmlFile, String disclaimerTextFile) {
+		this.disclaimerHtmlFile=disclaimerHtmlFile;
+		this.disclaimerTextFile=disclaimerTextFile;
+	}
 	
 	
 	private void log(String txt) {
@@ -38,14 +50,12 @@ public class Rebuilder {
 	
 	private Object rebuild(Object part) throws IOException, MessagingException {
 	
-		
-	
 		log("Object is a ["+part.getClass()+"]");
 		
 		if (part instanceof Message) {
 			
 			Message oldMsg=(Message) part;
-			MimeMessage newMsg=new MimeMessage((MimeMessage) oldMsg);			
+			MimeMessage newMsg=new MyMimeMessage((MimeMessage) oldMsg);	
 
 			Object oldObj=oldMsg.getContent();			
 			Object newObj=rebuild(oldObj);
@@ -194,7 +204,7 @@ public class Rebuilder {
 	private String appendHtmlDisclaimer(String c) throws IOException,
 			FileNotFoundException {
 		
-		return appendDisclaimer(c,"/etc/disclaimer.html");
+		return appendDisclaimer(c,disclaimerHtmlFile);
 		
 	}
 
@@ -202,7 +212,7 @@ public class Rebuilder {
 			FileNotFoundException {
 		
 		
-		return appendDisclaimer(c,"/etc/disclaimer.txt");
+		return appendDisclaimer(c,disclaimerTextFile);
 		
 		
 	}
